@@ -20,6 +20,9 @@ namespace Substrate
         [TagNode(Name = "author", Optional = true)]
         public string Author { get; set; }
 
+        [TagNode(Name = "Potion", Optional = true)]
+        public string Potion { get; set; }
+
         [TagNode(Name = "pages", Optional = true)]
         public List<string> Pages { get; } = new List<string>();
 
@@ -33,6 +36,7 @@ namespace Substrate
             ItemTag itemTag = new ItemTag();
             itemTag.Title = Title;
             itemTag.Author = Author;
+            itemTag.Potion = Potion;
 
             foreach (var e in Enchantments)
             {
@@ -65,6 +69,7 @@ namespace Substrate
                 new SchemaNodeList("ench", TagType.TAG_COMPOUND, Enchantment.Schema, SchemaOptions.OPTIONAL),
                 new SchemaNodeScalar("title", TagType.TAG_STRING, SchemaOptions.OPTIONAL),
                 new SchemaNodeScalar("author", TagType.TAG_STRING, SchemaOptions.OPTIONAL),
+                new SchemaNodeString("Potion", SchemaOptions.OPTIONAL),
                 new SchemaNodeList("pages", TagType.TAG_STRING, SchemaOptions.OPTIONAL),
             }, SchemaOptions.OPTIONAL),
         };
@@ -165,6 +170,7 @@ namespace Substrate
             item.ID = ID;
             item.Count = Count;
             item.Damage = Damage;
+            item.Tag = Tag;
 
             foreach (Enchantment e in _enchantments)
             {
@@ -197,7 +203,14 @@ namespace Substrate
             var id = ctree["id"];
             if (id.GetTagType() == TagType.TAG_SHORT)
             {
-                ID = ItemInfo.ItemTable[id.ToTagShort()].NameID;
+                if (id.ToTagShort() < 256)
+                {
+                    ID = BlockInfo.BlockTable[id.ToTagShort()].NameID;
+                }
+                else
+                {
+                    ID = ItemInfo.ItemTable[id.ToTagShort()].NameID;
+                }
             }
             else
             {
@@ -206,6 +219,7 @@ namespace Substrate
 
             Count = ctree["Count"].ToTagByte();
             Damage = ctree["Damage"].ToTagShort();
+            Tag = new ItemTag();
 
             if (ctree.ContainsKey("tag"))
             {
@@ -217,6 +231,25 @@ namespace Substrate
                     foreach (TagNode tag in enchList)
                     {
                         _enchantments.Add(new Enchantment().LoadTree(tag));
+                    }
+                }
+                if (tagtree.ContainsKey("title"))
+                {
+                    Tag.Title = tagtree["title"].ToTagString();
+                }
+                if (tagtree.ContainsKey("author"))
+                {
+                    Tag.Author = tagtree["author"].ToTagString();
+                }
+                if (tagtree.ContainsKey("Potion"))
+                {
+                    Tag.Potion = tagtree["Potion"].ToTagString();
+                }
+                if (tagtree.ContainsKey("pages"))
+                {
+                    foreach (TagNodeString page in tagtree["pages"].ToTagList())
+                    {
+                        Tag.Pages.Add(page);
                     }
                 }
             }
@@ -245,6 +278,8 @@ namespace Substrate
             tree["Count"] = new TagNodeByte((byte)Count);
             tree["Damage"] = new TagNodeShort((short)Damage);
 
+            TagNodeCompound tagtree = new TagNodeCompound();
+
             if (_enchantments.Count > 0)
             {
                 TagNodeList enchList = new TagNodeList(TagType.TAG_COMPOUND);
@@ -253,19 +288,40 @@ namespace Substrate
                     enchList.Add(e.BuildTree());
                 }
 
-                TagNodeCompound tagtree = new TagNodeCompound();
                 tagtree["ench"] = enchList;
-
-                if (_source != null && _source.ContainsKey("tag"))
+            }
+            if (!string.IsNullOrEmpty(Tag.Potion))
+            {
+                tagtree["Potion"] = new TagNodeString(Tag.Potion);
+            }
+            if (!string.IsNullOrEmpty(Tag.Title))
+            {
+                tagtree["title"] = new TagNodeString(Tag.Title);
+            }
+            if (!string.IsNullOrEmpty(Tag.Author))
+            {
+                tagtree["author"] = new TagNodeString(Tag.Author);
+            }
+            if (Tag.Pages != null && Tag.Pages.Count > 0)
+            {
+                TagNodeList pages = new TagNodeList(TagType.TAG_STRING);
+                foreach (string page in Tag.Pages)
                 {
-                    tagtree.MergeFrom(_source["tag"].ToTagCompound());
+                    pages.Add(new TagNodeString(page));
                 }
-
-                tree["tag"] = tagtree;
+                tagtree["pages"] = pages;
             }
 
             if (_source != null)
             {
+                if (_source.ContainsKey("tag"))
+                {
+                    tagtree.MergeFrom(_source["tag"].ToTagCompound());
+                }
+                if (tagtree.Count > 0)
+                {
+                    tree["tag"] = tagtree;
+                }
                 tree.MergeFrom(_source);
             }
 

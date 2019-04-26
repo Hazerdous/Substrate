@@ -188,6 +188,8 @@ namespace Substrate
         public const int ACACIA_DOOR = 430;
         public const int DARK_OAK_DOOR = 431;
 
+        public const int SPLASH_POTION = 438;
+
         public const int MUSIC_DISC_13 = 2256;
         public const int MUSIC_DISC_CAT = 2257;
         public const int MUSIC_DISC_BLOCKS = 2258;
@@ -508,6 +510,8 @@ namespace Substrate
         public static ItemInfo AcaciaDoor;
         public static ItemInfo DarkOakDoor;
 
+        public static ItemInfo SplashPotion;
+
         public static ItemInfo MusicDisc13;
         public static ItemInfo MusicDiscCat;
         public static ItemInfo MusicDiscBlocks;
@@ -703,6 +707,8 @@ namespace Substrate
             JungleDoor = new ItemInfo(429, "minecraft:jungle_door", "Jungle Door");
             AcaciaDoor = new ItemInfo(430, "minecraft:acacia_door", "Acacia Door");
             DarkOakDoor = new ItemInfo(431, "minecraft:dark_oak_door", "Dark Oak Door");
+
+            SplashPotion = new ItemInfo(438, "minecraft:splash_potion", "Splash Potion");
 
             MusicDisc13 = new ItemInfo(2256, "minecraft:record_13", "13 Disc");
             MusicDiscCat = new ItemInfo(2257, "minecraft:record_cat", "Cat Disc");
