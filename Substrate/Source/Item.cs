@@ -23,6 +23,9 @@ namespace Substrate
         [TagNode(Name = "Potion", Optional = true)]
         public string Potion { get; set; }
 
+        [TagNode(Name = "CustomPotionEffects")]
+        public List<PotionEffect> CustomPotionEffects { get; } = new List<PotionEffect>();
+
         [TagNode(Name = "pages", Optional = true)]
         public List<string> Pages { get; } = new List<string>();
 
@@ -71,14 +74,7 @@ namespace Substrate
                 new SchemaNodeScalar("author", TagType.TAG_STRING, SchemaOptions.OPTIONAL),
                 new SchemaNodeScalar("Potion", TagType.TAG_STRING, SchemaOptions.OPTIONAL),
                 new SchemaNodeList("pages", TagType.TAG_STRING, SchemaOptions.OPTIONAL),
-                new SchemaNodeList("CustomPotionEffects", TagType.TAG_COMPOUND, new SchemaNodeCompound("") {
-                    new SchemaNodeScalar("Id", TagType.TAG_BYTE),
-                    new SchemaNodeScalar("Amplifier", TagType.TAG_BYTE, SchemaOptions.OPTIONAL),
-                    new SchemaNodeScalar("Duration", TagType.TAG_INT, SchemaOptions.OPTIONAL),
-                    new SchemaNodeScalar("Ambient", TagType.TAG_BYTE, SchemaOptions.OPTIONAL),
-                    new SchemaNodeScalar("ShowParticles", TagType.TAG_BYTE, SchemaOptions.OPTIONAL),
-                    new SchemaNodeScalar("ShowIcon", TagType.TAG_BYTE, SchemaOptions.OPTIONAL),
-                }, SchemaOptions.OPTIONAL)
+                new SchemaNodeList("CustomPotionEffects", TagType.TAG_COMPOUND, PotionEffect.Schema, SchemaOptions.OPTIONAL)
             }, SchemaOptions.OPTIONAL),
         };
 
