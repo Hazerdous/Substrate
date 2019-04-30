@@ -11,7 +11,7 @@ namespace Substrate.TileEntities
         public static readonly SchemaNodeCompound MobSpawnerSchema = TileEntity.Schema.MergeInto(new SchemaNodeCompound("")
         {
             new SchemaNodeString("id", TypeId),
-            new SchemaNodeScalar("EntityId", TagType.TAG_STRING),
+            new SchemaNodeScalar("EntityId", TagType.TAG_STRING, SchemaOptions.OPTIONAL),
             new SchemaNodeScalar("Delay", TagType.TAG_SHORT),
 			new SchemaNodeScalar("MaxSpawnDelay", TagType.TAG_SHORT, SchemaOptions.OPTIONAL),
 			new SchemaNodeScalar("MinSpawnDelay", TagType.TAG_SHORT, SchemaOptions.OPTIONAL),
@@ -186,8 +186,8 @@ namespace Substrate.TileEntities
             }
 
             _delay = ctree["Delay"].ToTagShort();
-            _entityID = ctree["EntityId"].ToTagString();
-
+            if (ctree.ContainsKey("EntityId"))
+                _entityID = ctree["EntityId"].ToTagString();
             if (ctree.ContainsKey("MaxSpawnDelay"))
                 _maxDelay = ctree["MaxSpawnDelay"].ToTagShort();
             if (ctree.ContainsKey("MinSpawnDelay"))
@@ -220,7 +220,8 @@ namespace Substrate.TileEntities
         public override TagNode BuildTree ()
         {
             TagNodeCompound tree = base.BuildTree() as TagNodeCompound;
-            tree["EntityId"] = new TagNodeString(_entityID);
+            if (_entityID != null)
+                tree["EntityId"] = new TagNodeString(_entityID);
             tree["Delay"] = new TagNodeShort(_delay);
 
             if (_maxDelay != null)
